@@ -1,19 +1,10 @@
 "use client";
 
 import { signIn, useSession } from "next-auth/react";
-import { useRouter } from "next/navigation";
-import { useEffect } from "react";
 import { BarChart3, TrendingUp, Eye, Heart } from "lucide-react";
 
 export default function Home() {
-  const { data: session, status } = useSession();
-  const router = useRouter();
-
-  useEffect(() => {
-    if (status === "authenticated") {
-      router.push("/dashboard");
-    }
-  }, [status, router]);
+  const { status } = useSession();
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800">
@@ -27,7 +18,7 @@ export default function Home() {
             Unlock deep insights from your X (Twitter) posts
           </p>
           <button
-            onClick={() => signIn("twitter")}
+            onClick={() => signIn("twitter", { callbackUrl: "/dashboard" })}
             disabled={status === "loading"}
             className="bg-black dark:bg-white text-white dark:text-black px-8 py-4 rounded-full text-lg font-semibold hover:bg-gray-800 dark:hover:bg-gray-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >

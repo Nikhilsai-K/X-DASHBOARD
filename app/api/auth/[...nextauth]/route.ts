@@ -19,9 +19,12 @@ export const authOptions: NextAuthOptions = {
     async jwt({ token, account, profile }) {
       // Persist the OAuth access_token and user info to the token right after signin
       if (account) {
+        console.log("JWT Callback - Account:", account);
+        console.log("JWT Callback - Profile:", profile);
         token.accessToken = account.access_token;
         token.refreshToken = account.refresh_token;
-        token.userId = profile?.sub || profile?.id;
+        // Twitter profile uses 'data.id' for OAuth 2.0
+        token.userId = (profile as any)?.data?.id || profile?.sub || (profile as any)?.id || account.providerAccountId;
       }
       return token;
     },
@@ -29,6 +32,11 @@ export const authOptions: NextAuthOptions = {
       // Send properties to the client
       session.accessToken = token.accessToken as string;
       session.userId = token.userId as string;
+      console.log("Session Callback - Final session:", {
+        hasAccessToken: !!session.accessToken,
+        hasUserId: !!session.userId,
+        userId: session.userId
+      });
       return session;
     },
   },
