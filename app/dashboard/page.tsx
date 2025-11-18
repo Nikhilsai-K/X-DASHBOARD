@@ -54,7 +54,12 @@ export default function Dashboard() {
       ]);
 
       if (!tweetsRes.ok || !userRes.ok) {
-        throw new Error("Failed to fetch data from X API");
+        const tweetsError = !tweetsRes.ok ? await tweetsRes.json() : null;
+        const userError = !userRes.ok ? await userRes.json() : null;
+        const errorMsg = tweetsError?.error || userError?.error || "Failed to fetch data from X API";
+        const errorDetails = tweetsError?.details || userError?.details || "";
+        console.error("API Error:", { tweetsError, userError });
+        throw new Error(`${errorMsg}${errorDetails ? ` - ${errorDetails}` : ""}`);
       }
 
       const tweetsData = await tweetsRes.json();
