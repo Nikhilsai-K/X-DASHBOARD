@@ -48,25 +48,21 @@ export default function Dashboard() {
       setLoading(true);
       setError(null);
 
-      const [tweetsRes, userRes] = await Promise.all([
-        fetch("/api/twitter/tweets?max_results=100"),
-        fetch("/api/twitter/user"),
-      ]);
+      // Only ONE API call - tweets endpoint returns both user and tweets!
+      const response = await fetch("/api/twitter/tweets?max_results=100");
 
-      if (!tweetsRes.ok || !userRes.ok) {
-        const tweetsError = !tweetsRes.ok ? await tweetsRes.json() : null;
-        const userError = !userRes.ok ? await userRes.json() : null;
-        const errorMsg = tweetsError?.error || userError?.error || "Failed to fetch data from X API";
-        const errorDetails = tweetsError?.details || userError?.details || "";
-        console.error("API Error:", { tweetsError, userError });
+      if (!response.ok) {
+        const errorData = await response.json();
+        const errorMsg = errorData?.error || "Failed to fetch data from X API";
+        const errorDetails = errorData?.details || "";
+        console.error("API Error:", errorData);
         throw new Error(`${errorMsg}${errorDetails ? ` - ${errorDetails}` : ""}`);
       }
 
-      const tweetsData = await tweetsRes.json();
-      const userData = await userRes.json();
+      const data = await response.json();
 
-      setTweets(tweetsData.tweets || []);
-      setUser(userData);
+      setTweets(data.tweets || []);
+      setUser(data.user);
     } catch (err: any) {
       console.error("Error fetching data:", err);
       setError(err.message || "Failed to load dashboard data");
